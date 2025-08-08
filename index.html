@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taekwondo Master</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* Custom CSS for progress bar */
+        .progress-bar-container {
+            position: relative;
+            height: 10px;
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #3b82f6;
+            transition: width 0.5s ease-in-out;
+            border-radius: 9999px;
+        }
+        .chart-bar {
+            transition: height 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- App Container -->
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
+
+        <!-- Header -->
+        <header class="p-6 bg-gradient-to-r from-blue-600 to-blue-800 text-white flex items-center justify-between">
+            <h1 class="text-2xl font-bold">Taekwondo Master</h1>
+            <nav>
+                <button id="dashboard-btn" class="nav-btn px-3 py-1 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition">Dashboard</button>
+            </nav>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="app-content" class="p-6 h-[70vh] overflow-y-auto">
+            <!-- Content will be dynamically injected here by JavaScript -->
+        </main>
+
+        <!-- Navigation Bar -->
+        <footer class="bg-gray-200 p-4 border-t border-gray-300 flex justify-around">
+            <button id="lessons-btn" class="nav-btn flex flex-col items-center text-gray-600 hover:text-blue-600 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.467 9.5 5.23 8.232 5.087a.896.896 0 00-.735.155l-.42.368a.93.93 0 00-.288.72l-.128.91c-.053.385-.224.743-.48.995L4.8 11.23a2.003 2.003 0 00-.712 2.15l.235.617a.999.999 0 00.916.634l.79.034a.996.996 0 01.78.27l.385.394c.265.27.625.422 1.006.452l1.096.082a1.002 1.002 0 001.077-.16l.22-.19c.277-.238.448-.606.495-.985l.081-.664a1.003 1.003 0 011.006-.884l.988.077c.38.03.74.182 1.006.452l.385.394a.996.996 0 01.78.27l.79.034a.999.999 0 00.916-.634l.235-.617a2.003 2.003 0 00-.712-2.15l-3.344-3.09c-.256-.252-.427-.61-.48-.995l-.128-.91a.93.93 0 00-.288-.72l-.42-.368a.896.896 0 00-.735-.155l-.014.002zM12 6.253c-1.072 0-2.072.193-3.003.52M12 6.253C13.072 6.253 14.072 6.193 15.003 6.52" />
+                </svg>
+                <span class="text-xs mt-1">Lessons</span>
+            </button>
+            <button id="workouts-btn" class="nav-btn flex flex-col items-center text-gray-600 hover:text-blue-600 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span class="text-xs mt-1">Workouts</span>
+            </button>
+            <button id="progress-btn" class="nav-btn flex flex-col items-center text-gray-600 hover:text-blue-600 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                </svg>
+                <span class="text-xs mt-1">Progress</span>
+            </button>
+        </footer>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full text-center">
+            <h3 id="modal-title" class="text-xl font-bold mb-2"></h3>
+            <p id="modal-message" class="text-gray-700 mb-4"></p>
+            <button id="modal-close-btn" class="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // Data for the app
+        const user = {
+            name: "John Doe",
+            belt: "White",
+            level: 1,
+            xp: 0,
+            xpToNextLevel: 1000,
+            lessonsCompleted: 0,
+            workoutsCompleted: 0,
+            formsPracticed: 0,
+            dailyMissionCompleted: false,
+        };
+
+        const beltRanks = [
+            { belt: "White", xpLevel: 0 },
+            { belt: "Yellow Stripe", xpLevel: 1000 },
+            { belt: "Yellow", xpLevel: 2500 },
+            { belt: "Green Stripe", xpLevel: 5000 },
+            { belt: "Green", xpLevel: 8000 },
+            { belt: "Blue Stripe", xpLevel: 12000 },
+            { belt: "Blue", xpLevel: 16000 },
+            { belt: "Red Stripe", xpLevel: 21000 },
+            { belt: "Red", xpLevel: 27000 },
+            { belt: "Black Stripe", xpLevel: 35000 },
+            { belt: "Black 1st Dan", xpLevel: 45000 },
+            { belt: "Black 2nd Dan", xpLevel: 60000 },
+            { belt: "Black 3rd Dan", xpLevel: 80000 },
+        ];
+
+        // All lessons and forms available in the app
+        const allLessons = [
+            // White Belt Lessons
+            { id: 'white-stance-1', title: 'Horse Stance (Juchum Seogi)', xp: 50, belt: 'White' },
+            { id: 'white-stance-2', title: 'Walking Stance (Ap Seogi)', xp: 50, belt: 'White' },
+            { id: 'white-stance-3', title: 'Forward Stance (Ap Kubi)', xp: 50, belt: 'White' },
+            { id: 'white-block-1', title: 'Low Block (Arae Makki)', xp: 50, belt: 'White' },
+            { id: 'white-kick-1', title: 'Front Snap Kick (Ap Chagi)', xp: 50, belt: 'White' },
+            
+            // Yellow Stripe Lessons
+            { id: 'form-taegeuk-1', title: 'Taegeuk Il Jang (Form 1)', xp: 100, belt: 'Yellow Stripe' },
+            { id: 'yellow-block-1', title: 'Middle Block (Momtong Makki)', xp: 50, belt: 'Yellow Stripe' },
+            
+            // Yellow Belt Lessons
+            { id: 'form-taegeuk-2', title: 'Taegeuk Ee Jang (Form 2)', xp: 100, belt: 'Yellow' },
+            { id: 'yellow-block-2', title: 'High Block (Eolgul Makki)', xp: 50, belt: 'Yellow' },
+            { id: 'yellow-kick-1', title: 'Roundhouse Kick (Dollyo Chagi)', xp: 50, belt: 'Yellow' },
+
+            // Green Stripe Lessons
+            { id: 'form-taegeuk-3', title: 'Taegeuk Sam Jang (Form 3)', xp: 100, belt: 'Green Stripe' },
+            { id: 'green-block-1', title: 'Knife-Hand Block (Sonnal Makki)', xp: 50, belt: 'Green Stripe' },
+            
+            // Green Belt Lessons
+            { id: 'form-taegeuk-4', title: 'Taegeuk Sa Jang (Form 4)', xp: 100, belt: 'Green' },
+            { id: 'green-kick-1', title: 'Side Kick (Yeop Chagi)', xp: 50, belt: 'Green' },
+            
+            // Blue Stripe Lessons
+            { id: 'form-taegeuk-5', title: 'Taegeuk Oh Jang (Form 5)', xp: 100, belt: 'Blue Stripe' },
+            { id: 'blue-block-1', title: 'Pincer Block (Gawi Makki)', xp: 50, belt: 'Blue Stripe' },
+            
+            // Blue Belt Lessons
+            { id: 'form-taegeuk-6', title: 'Taegeuk Yuk Jang (Form 6)', xp: 100, belt: 'Blue' },
+            { id: 'blue-stance-1', title: 'Tiger Stance (Beom Seogi)', xp: 50, belt: 'Blue' },
+            
+            // Red Stripe Lessons
+            { id: 'form-taegeuk-7', title: 'Taegeuk Chil Jang (Form 7)', xp: 100, belt: 'Red Stripe' },
+            
+            // Red Belt Lessons
+            { id: 'form-taegeuk-8', title: 'Taegeuk Pal Jang (Form 8)', xp: 100, belt: 'Red' },
+            
+            // Black Stripe Lessons
+            { id: 'form-koryo', title: 'Koryo (Black Belt Form)', xp: 200, belt: 'Black Stripe' },
+            
+            // Black Belt 1st Dan Lessons
+            { id: 'form-geumgang', title: 'Geumgang (Black Belt Form)', xp: 200, belt: 'Black 1st Dan' },
+        ];
+
+
+        // DOM elements
+        const appContent = document.getElementById('app-content');
+        const navButtons = document.querySelectorAll('.nav-btn');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        // Functions to manage app state and UI
+        function showModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modal.style.display = 'flex';
+        }
+
+        modalCloseBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        function saveUserData() {
+            // In a real app, this would save to a database.
+            // For this demo, we'll just log it.
+            console.log('User data saved:', user);
+        }
+
+        function gainXP(amount, message) {
+            user.xp += amount;
+            showModal('XP Gained!', `You earned ${amount} XP for completing a task. Keep it up!`);
+            
+            while (user.xp >= user.xpToNextLevel) {
+                user.xp -= user.xpToNextLevel;
+                user.level++;
+                user.xpToNextLevel = Math.floor(user.xpToNextLevel * 1.5); // Increase XP requirement for next level
+                showModal('Level Up!', `You are now level ${user.level}! A new challenge awaits!`);
+            }
+
+            checkBeltProgression();
+            saveUserData();
+            renderDashboard(); // Re-render the dashboard to show new progress
+        }
+
+        function checkBeltProgression() {
+            // Find the index of the user's current belt
+            const currentBeltIndex = beltRanks.findIndex(rank => rank.belt === user.belt);
+            // Check if there is a next belt and if the user has reached the XP level for it
+            if (currentBeltIndex < beltRanks.length - 1) {
+                const nextBelt = beltRanks[currentBeltIndex + 1];
+                if (user.xp >= nextBelt.xpLevel) {
+                    user.belt = nextBelt.belt;
+                    showModal('Belt Promotion!', `Congratulations, you have been promoted to **${user.belt}**!`);
+                }
+            }
+        }
+
+        function renderDashboard() {
+            const xpPercentage = (user.xp / user.xpToNextLevel) * 100;
+
+            const content = `
+                <section class="mb-8 p-4 bg-blue-100 rounded-xl">
+                    <h2 class="text-3xl font-extrabold text-blue-800 mb-1">Hi, ${user.name}!</h2>
+                    <p class="text-lg text-blue-700">You are a **${user.belt}** belt.</p>
+                    <p class="text-sm text-blue-600 font-semibold mt-2">Level ${user.level} - ${user.xp} / ${user.xpToNextLevel} XP</p>
+                    <div class="progress-bar-container mt-2">
+                        <div class="progress-bar" style="width: ${xpPercentage}%;"></div>
+                    </div>
+                </section>
+
+                <section class="mb-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Daily Mission</h3>
+                    <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-200">
+                        <p class="text-gray-700">Practice the first 5 moves of Taegeuk Il Jang.</p>
+                        <button id="complete-daily-mission-btn" class="mt-4 px-6 py-2 bg-yellow-500 text-white font-bold rounded-full hover:bg-yellow-600 transition shadow-md">Complete Mission (+50 XP)</button>
+                    </div>
+                </section>
+
+                <section class="mb-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Performance Charts</h3>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                        <div class="h-40 flex items-end gap-2">
+                            ${[user.lessonsCompleted, user.formsPracticed, user.workoutsCompleted].map((value, index) => `
+                                <div class="flex-1 bg-blue-500 rounded-t-lg chart-bar" style="height: ${(value / 10) * 100 > 100 ? 100 : (value / 10) * 100}%;"></div>
+                            `).join('')}
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-2">
+                            <span>Lessons</span>
+                            <span>Forms</span>
+                            <span>Workouts</span>
+                        </div>
+                    </div>
+                </section>
+            `;
+
+            appContent.innerHTML = content;
+            document.getElementById('complete-daily-mission-btn').addEventListener('click', () => {
+                if (!user.dailyMissionCompleted) {
+                    gainXP(50, 'Daily mission completed!');
+                    user.dailyMissionCompleted = true;
+                    renderDashboard(); // Re-render to disable button
+                } else {
+                    showModal('Already Complete', 'You have already completed your daily mission!');
+                }
+            });
+        }
+
+        function renderLessons() {
+            const userBeltIndex = beltRanks.findIndex(rank => rank.belt === user.belt);
+            const availableLessons = allLessons.filter(lesson => 
+                beltRanks.findIndex(r => r.belt === lesson.belt) <= userBeltIndex
+            );
+
+            const content = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Lesson Plans & Forms</h2>
+                <div class="space-y-4">
+                    ${availableLessons.map(lesson => `
+                        <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                            <div>
+                                <h4 class="font-semibold text-gray-900">${lesson.title}</h4>
+                                <p class="text-sm text-gray-500">For ${lesson.belt} Belts</p>
+                            </div>
+                            <button class="complete-lesson-btn px-4 py-2 bg-green-500 text-white rounded-full text-sm hover:bg-green-600 transition" data-xp="${lesson.xp}" data-task-type="${lesson.title.includes('Taegeuk') || lesson.title.includes('Koryo') ? 'forms' : 'lessons'}">Complete (+${lesson.xp} XP)</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            appContent.innerHTML = content;
+            document.querySelectorAll('.complete-lesson-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const xpAmount = parseInt(e.target.dataset.xp);
+                    const taskType = e.target.dataset.taskType;
+                    gainXP(xpAmount, 'Lesson completed!');
+                    if (taskType === 'lessons') user.lessonsCompleted++;
+                    if (taskType === 'forms') user.formsPracticed++;
+                });
+            });
+        }
+
+        function renderWorkouts() {
+            const workouts = [
+                { id: 'workout-1', title: 'Flexibility Routine', xp: 75 },
+                { id: 'workout-2', title: 'Core Strength', xp: 75 },
+                { id: 'workout-3', title: 'Speed Drills', xp: 75 },
+            ];
+
+            const content = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Exercise Programs</h2>
+                <div class="space-y-4">
+                    ${workouts.map(workout => `
+                        <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                            <h4 class="font-semibold text-gray-900">${workout.title}</h4>
+                            <button class="complete-workout-btn px-4 py-2 bg-purple-500 text-white rounded-full text-sm hover:bg-purple-600 transition" data-xp="${workout.xp}">Complete (+${workout.xp} XP)</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            appContent.innerHTML = content;
+            document.querySelectorAll('.complete-workout-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const xpAmount = parseInt(e.target.dataset.xp);
+                    gainXP(xpAmount, 'Workout completed!');
+                    user.workoutsCompleted++;
+                });
+            });
+        }
+
+        function renderProgress() {
+            const content = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Progress Tracker</h2>
+                <div class="space-y-4">
+                    <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-200">
+                        <h4 class="font-semibold text-gray-900">Level & Rank History</h4>
+                        <ul class="text-gray-700 mt-2 list-disc list-inside">
+                            <li>Reached Level 1 on 01/01/2025</li>
+                            <li>Achieved White Belt on 01/01/2025</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-200">
+                        <h4 class="font-semibold text-gray-900">Achievements</h4>
+                        <ul class="text-gray-700 mt-2 list-disc list-inside">
+                            <li><span class="font-semibold">First 10 Kicks:</span> Complete 10 kicking drills. (Bonus: +100 XP)</li>
+                            <li><span class="font-semibold">Consistent Student:</span> Practice 5 days in a row. (Bonus: +200 XP)</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            appContent.innerHTML = content;
+        }
+
+        // Event listeners for navigation
+        document.getElementById('dashboard-btn').addEventListener('click', renderDashboard);
+        document.getElementById('lessons-btn').addEventListener('click', renderLessons);
+        document.getElementById('workouts-btn').addEventListener('click', renderWorkouts);
+        document.getElementById('progress-btn').addEventListener('click', renderProgress);
+
+        // Initial render
+        renderDashboard();
+    </script>
+</body>
+</html>
