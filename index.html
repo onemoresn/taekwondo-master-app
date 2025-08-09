@@ -39,7 +39,11 @@
 
         <!-- Header -->
         <header class="p-6 bg-gradient-to-r from-blue-600 to-blue-800 text-white flex flex-col md:flex-row md:items-center justify-between">
-            <h1 class="text-3xl font-bold mb-4 md:mb-0">Taekwondo Master</h1>
+            <div class="flex items-center mb-4 md:mb-0">
+                <!-- Logo Placeholder -->
+                <img src="tkBoy4.png" alt="Taekwondo Master Logo" class="h-12 w-12 rounded-full mr-4">
+                <h1 class="text-3xl font-bold">Taekwondo Master</h1>
+            </div>
             <nav class="flex flex-row space-x-4">
                 <button id="dashboard-btn" class="nav-btn px-4 py-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition">Dashboard</button>
                 <button id="lessons-btn" class="nav-btn px-4 py-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition">Lessons</button>
@@ -100,6 +104,7 @@
             dailyMissionCompleted: false,
         };
 
+        // Updated belt ranks with Black Stripe before Double Black Stripe
         const beltRanks = [
             { belt: "White", xpLevel: 0 },
             { belt: "Yellow Stripe", xpLevel: 1000 },
@@ -108,15 +113,18 @@
             { belt: "Green", xpLevel: 8000 },
             { belt: "Blue Stripe", xpLevel: 12000 },
             { belt: "Blue", xpLevel: 16000 },
-            { belt: "Red Stripe", xpLevel: 21000 },
-            { belt: "Red", xpLevel: 27000 },
-            { belt: "Black Stripe", xpLevel: 35000 },
+            { belt: "Brown Stripe", xpLevel: 19000 },
+            { belt: "Brown", xpLevel: 22000 },
+            { belt: "Red Stripe", xpLevel: 26000 },
+            { belt: "Red", xpLevel: 30000 },
+            { belt: "Black Stripe", xpLevel: 34000 }, // Position changed
+            { belt: "Double Black Stripe", xpLevel: 38000 }, // Position changed
             { belt: "Black 1st Dan", xpLevel: 45000 },
             { belt: "Black 2nd Dan", xpLevel: 60000 },
             { belt: "Black 3rd Dan", xpLevel: 80000 },
         ];
 
-        // All lessons and forms available in the app
+        // All lessons and forms available in the app, with updated belt mappings
         const allLessons = [
             // White Belt Lessons
             { id: 'white-stance-1', title: 'Horse Stance (Juchum Seogi)', xp: 50, belt: 'White' },
@@ -150,17 +158,32 @@
             { id: 'form-taegeuk-6', title: 'Taegeuk Yuk Jang (Form 6)', xp: 100, belt: 'Blue' },
             { id: 'blue-stance-1', title: 'Tiger Stance (Beom Seogi)', xp: 50, belt: 'Blue' },
             
+            // Brown Stripe Lessons
+            { id: 'brown-stripe-form', title: 'Poomsae Chil Jang (Form 7)', xp: 100, belt: 'Brown Stripe' },
+            
+            // Brown Belt Lessons
+            { id: 'brown-belt-form', title: 'Poomsae Pal Jang (Form 8)', xp: 100, belt: 'Brown' },
+            
             // Red Stripe Lessons
-            { id: 'form-taegeuk-7', title: 'Taegeuk Chil Jang (Form 7)', xp: 100, belt: 'Red Stripe' },
+            { id: 'red-stripe-form', title: 'Hwarang Form', xp: 100, belt: 'Red Stripe' },
             
             // Red Belt Lessons
-            { id: 'form-taegeuk-8', title: 'Taegeuk Pal Jang (Form 8)', xp: 100, belt: 'Red' },
-            
+            { id: 'red-belt-form', title: 'Choi Yong Form', xp: 100, belt: 'Red' },
+
             // Black Stripe Lessons
-            { id: 'form-koryo', title: 'Koryo (Black Belt Form)', xp: 200, belt: 'Black Stripe' },
+            { id: 'black-stripe-form', title: 'Advanced Sparring Drills', xp: 150, belt: 'Black Stripe' },
+            
+            // Double Black Stripe Lessons
+            { id: 'double-black-stripe-form', title: 'Koryo Poomsae', xp: 200, belt: 'Double Black Stripe' },
             
             // Black Belt 1st Dan Lessons
             { id: 'form-geumgang', title: 'Geumgang (Black Belt Form)', xp: 200, belt: 'Black 1st Dan' },
+
+            // Black Belt 2nd Dan Lessons
+            { id: 'form-jitae', title: 'Jitae (Black Belt Form)', xp: 250, belt: 'Black 2nd Dan' },
+
+            // Black Belt 3rd Dan Lessons
+            { id: 'form-cheonggwon', title: 'Cheonggwon (Black Belt Form)', xp: 300, belt: 'Black 3rd Dan' },
         ];
 
 
@@ -283,7 +306,7 @@
                                 <h4 class="font-semibold text-gray-900">${lesson.title}</h4>
                                 <p class="text-sm text-gray-500">For ${lesson.belt} Belts</p>
                             </div>
-                            <button class="complete-lesson-btn mt-4 px-4 py-2 bg-green-500 text-white rounded-full text-sm hover:bg-green-600 transition" data-xp="${lesson.xp}" data-task-type="${lesson.title.includes('Taegeuk') || lesson.title.includes('Koryo') ? 'forms' : 'lessons'}">Complete (+${lesson.xp} XP)</button>
+                            <button class="complete-lesson-btn mt-4 px-4 py-2 bg-green-500 text-white rounded-full text-sm hover:bg-green-600 transition" data-xp="${lesson.xp}" data-task-type="${lesson.title.includes('Poomsae') || lesson.title.includes('Hwarang') || lesson.title.includes('Choi Yong') || lesson.title.includes('Koryo') || lesson.title.includes('Geumgang') || lesson.title.includes('Jitae') || lesson.title.includes('Cheonggwon') ? 'forms' : 'lessons'}">Complete (+${lesson.xp} XP)</button>
                         </div>
                     `).join('')}
                 </div>
@@ -293,7 +316,7 @@
             document.querySelectorAll('.complete-lesson-btn').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const xpAmount = parseInt(e.target.dataset.xp);
-                    const taskType = e.target.dataset.taskType;
+                    const taskType = e.target.dataset.task-type;
                     gainXP(xpAmount, 'Lesson completed!');
                     if (taskType === 'lessons') user.lessonsCompleted++;
                     if (taskType === 'forms') user.formsPracticed++;
