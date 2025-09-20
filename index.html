@@ -1,396 +1,578 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taekwondo Master</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Font -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-        }
-        /* Custom CSS for progress bar */
-        .progress-bar-container {
-            position: relative;
-            height: 10px;
-            background-color: #e5e7eb;
-            border-radius: 9999px;
-            overflow: hidden;
-        }
-        .progress-bar {
-            height: 100%;
-            background-color: #3b82f6;
-            transition: width 0.5s ease-in-out;
-            border-radius: 9999px;
-        }
-        .chart-bar {
-            transition: height 0.5s ease-in-out;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taekwondo Gamified App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .xp-bar {
+      transition: width 0.4s;
+    }
+    .belt {
+      font-weight: bold;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      color: white;
+      margin-right: 0.5rem;
+    }
+    .belt-white { background: #e5e7eb; color: #222; border: 1px solid #bbb; }
+    .belt-yellow { background: #fde047; color: #b59b00; }
+    .belt-green { background: #22c55e; }
+    .belt-blue { background: #3b82f6; }
+    .belt-red { background: #ef4444; }
+    .belt-black { background: #222; }
+
+    /* Glass and hero visuals */
+    .glass { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(10px); }
+    .hero-bg { position: relative; overflow: hidden; }
+    .hero-bg::before, .hero-bg::after {
+      content: ""; position: absolute; inset: -20%; border-radius: 50%; filter: blur(50px); opacity: 0.5; pointer-events: none;
+    }
+    .hero-bg::before { background: radial-gradient(circle at 30% 40%, var(--glow1, rgba(99,102,241,0.4)), transparent 50%); }
+    .hero-bg::after { background: radial-gradient(circle at 75% 30%, var(--glow2, rgba(56,189,248,0.4)), transparent 55%); }
+    .tab-btn { color: #94a3b8; font-weight: 600; }
+    .tab-btn.active { color: #e2e8f0; }
+
+    /* Thin scrollbar styling (applied conditionally) */
+    .thin-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+    .thin-scroll::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.5); border-radius: 8px; }
+    .thin-scroll::-webkit-scrollbar-track { background: transparent; }
+  </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
-
-    <!-- App Container -->
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-7xl lg:max-w-4xl xl:max-w-5xl overflow-hidden">
-
-        <!-- Header -->
-        <header class="p-6 bg-gradient-to-r from-blue-600 to-blue-800 text-white flex flex-col md:flex-row md:items-center justify-between">
-            <div class="flex items-center mb-4 md:mb-0">
-                <!-- Logo Placeholder -->
-                <img src="tkBoy4.png" alt="Taekwondo Master Logo" class="h-12 w-12 rounded-full mr-4">
-                <h1 class="text-3xl font-bold">Taekwondo Master</h1>
-            </div>
-            <nav class="flex flex-row space-x-4">
-                <button id="dashboard-btn" class="nav-btn px-4 py-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition">Dashboard</button>
-                <button id="lessons-btn" class="nav-btn px-4 py-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition">Lessons</button>
-                <button id="workouts-btn" class="nav-btn px-4 py-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition">Workouts</button>
-                <button id="progress-btn" class="nav-btn px-4 py-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition">Progress</button>
-            </nav>
-        </header>
-
-        <!-- Main Content Area -->
-        <main id="app-content" class="p-6 h-[70vh] overflow-y-auto">
-            <!-- Content will be dynamically injected here by JavaScript -->
-        </main>
-
-        <!-- Mobile Navigation Bar -->
-        <footer class="bg-gray-200 p-4 border-t border-gray-300 flex justify-around md:hidden">
-            <button id="lessons-btn-mobile" class="nav-btn flex flex-col items-center text-gray-600 hover:text-blue-600 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.467 9.5 5.23 8.232 5.087a.896.896 0 00-.735.155l-.42.368a.93.93 0 00-.288.72l-.128.91c-.053.385-.224.743-.48.995L4.8 11.23a2.003 2.003 0 00-.712 2.15l.235.617a.999.999 0 00.916.634l.79.034a.996.996 0 01.78.27l.385.394c.265.27.625.422 1.006.452l1.096.082a1.002 1.002 0 001.077-.16l.22-.19c.277-.238.448-.606.495-.985l.081-.664a1.003 1.003 0 011.006-.884l.988.077c.38.03.74.182 1.006.452l.385.394a.996.996 0 01.78.27l.79.034a.999.999 0 00.916-.634l.235-.617a2.003 2.003 0 00-.712-2.15l-3.344-3.09c-.256-.252-.427-.61-.48-.995l-.128-.91a.93.93 0 00-.288-.72l-.42-.368a.896.896 0 00-.735-.155l-.014.002zM12 6.253c-1.072 0-2.072.193-3.003.52M12 6.253C13.072 6.253 14.072 6.193 15.003 6.52" />
-                </svg>
-                <span class="text-xs mt-1">Lessons</span>
-            </button>
-            <button id="workouts-btn-mobile" class="nav-btn flex flex-col items-center text-gray-600 hover:text-blue-600 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span class="text-xs mt-1">Workouts</span>
-            </button>
-            <button id="progress-btn-mobile" class="nav-btn flex flex-col items-center text-gray-600 hover:text-blue-600 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-                </svg>
-                <span class="text-xs mt-1">Progress</span>
-            </button>
-        </footer>
-    </div>
-
-    <!-- Message Modal -->
-    <div id="modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full text-center">
-            <h3 id="modal-title" class="text-xl font-bold mb-2"></h3>
-            <p id="modal-message" class="text-gray-700 mb-4"></p>
-            <button id="modal-close-btn" class="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition">OK</button>
+<body class="bg-slate-900 text-white min-h-screen font-sans">
+  <div class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-[380px] max-w-full rounded-[28px] overflow-hidden shadow-2xl border border-white/10 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-800">
+      <!-- Top chips row -->
+      <div class="px-5 pt-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="glass rounded-full px-3 py-1 text-sm flex items-center gap-1">
+            <span>🪙</span><span>$</span><span>563</span>
+          </div>
+          <div class="glass rounded-full px-3 py-1 text-sm flex items-center gap-1">
+            <span>💎</span><span>1,205</span>
+          </div>
         </div>
+        <div class="glass rounded-full px-2 py-1 text-xs flex items-center gap-2">
+          <div class="w-6 h-6 rounded-full bg-emerald-400 grid place-items-center text-slate-900 font-bold">U</div>
+          <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full">online</span>
+        </div>
+      </div>
+
+      <!-- Hero section -->
+      <div id="heroBg" class="hero-bg relative mt-3 mx-4 rounded-2xl p-4 border border-white/10 bg-white/5 overflow-hidden">
+        <div class="absolute inset-0"></div>
+        <div class="relative z-10 flex items-center justify-between">
+          <div>
+            <h1 class="text-xl font-bold">🥋 Taekwondo Quest</h1>
+            <div class="mt-2 flex items-center gap-2">
+              <div id="beltDisplay" class="belt belt-white">White Belt</div>
+            </div>
+          </div>
+          <img src="image.png" alt="Character" class="w-32 h-32 object-fit rounded-xl shadow-2xl ring-2 ring-white/20">
+        </div>
+        <!-- XP Row -->
+        <div class="relative z-10 mt-4">
+          <div class="flex items-center gap-4 text-slate-200">
+            <div class="font-semibold">Lvl <span id="level">1</span></div>
+            <div class="text-sm">XP <span id="xp">0</span>/<span id="xpMax">100</span></div>
+          </div>
+          <div class="w-full bg-white/10 rounded-full h-2 mt-2">
+            <div id="xpBar" class="xp-bar bg-cyan-400 h-2 rounded-full" style="width:0%"></div>
+          </div>
+        </div>
+
+        <!-- Stat cards mimic -->
+        <div class="relative z-10 mt-4 grid grid-cols-3 gap-2">
+          <div class="glass rounded-xl p-3 text-center text-sm">
+            <div class="text-slate-300">Forms</div>
+            <div class="text-cyan-300 font-bold">Beginner</div>
+          </div>
+          <div class="glass rounded-xl p-3 text-center text-sm">
+            <div class="text-slate-300">Sparring</div>
+            <div class="text-fuchsia-300 font-bold">Starter</div>
+          </div>
+          <div class="glass rounded-xl p-3 text-center text-sm">
+            <div class="text-slate-300">Defense</div>
+            <div class="text-amber-300 font-bold">Novice</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="px-5 mt-5">
+        <div class="flex items-center gap-6">
+          <button class="tab-btn active" data-tab="lessons">Lessons</button>
+          <button class="tab-btn" data-tab="dailies">Dailies</button>
+          <button class="tab-btn" data-tab="exercises">Exercises</button>
+          <button class="tab-btn hidden" data-tab="terms">Terms</button>
+        </div>
+        <div class="h-1 bg-white/10 rounded mt-2 relative">
+          <div id="tabIndicator" class="absolute left-0 top-0 h-1 bg-cyan-400 rounded transition-all" style="width:33.333%"></div>
+        </div>
+      </div>
+
+      <!-- Lists -->
+      <div class="px-5 py-4 space-y-5 text-black">
+        <ul id="lessonList" class="space-y-2"></ul>
+        <ul id="dailiesList" class="space-y-2 hidden"></ul>
+        <ul id="exercisesList" class="space-y-2 hidden"></ul>
+        <ul id="termsList" class="space-y-2 hidden"></ul>
+      </div>
+
+      <!-- Belt select control -->
+      <div class="px-5 pb-5">
+        <label for="beltSelect" class="block text-sm text-slate-300 mb-2">Select Your Belt</label>
+        <select id="beltSelect" class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-black">
+          <option value="white">White</option>
+          <option value="yellow">Yellow</option>
+          <option value="yellowGreen">Yellow Belt Green Stripe</option>
+          <option value="green">Green</option>
+          <option value="greenBlue">Green Belt Blue Stripe</option>
+          <option value="blue">Blue</option>
+          <option value="blueBrown">Blue Belt Brown Stripe</option>
+          <option value="brown">Brown Belt</option>
+          <option value="brownRed">Brown Belt Red Stripe</option>
+          <option value="red">Red</option>
+          <option value="redOne">Red Belt One Stripe</option>
+          <option value="redTwo">Red Belt Two Stripes</option>
+          <option value="black">Black</option>
+        </select>
+      </div>
+
+      <!-- Bottom navigation -->
+      <div class="bg-black/30 backdrop-blur border-t border-white/10 px-6 py-3 flex justify-between text-slate-300">
+        <button class="flex flex-col items-center text-xs">
+          <span>📊</span><span>Stats</span>
+        </button>
+        <button class="flex flex-col items-center text-xs text-cyan-300">
+          <span>🏠</span><span>Main</span>
+        </button>
+        <button class="flex flex-col items-center text-xs">
+          <span>🏆</span><span>Events</span>
+        </button>
+        <button class="flex flex-col items-center text-xs">
+          <span>👥</span><span>Friends</span>
+        </button>
+      </div>
     </div>
+  </div>
+  <script>
+    // Belt data
+    const beltData = {
+      white: {
+        name: 'White Belt',
+        class: 'belt-white',
+        lessons: [
+          'Introduction to Taekwondo',
+          'Basic Stances',
+          'Respect & Etiquette',
+        ],
+        dailies: [
+          '10x Bow Practice',
+          '5 min Meditation',
+        ],
+        exercises: [
+          '10x Front Kicks',
+          '10x Punches',
+        ],
+        terms: [
+          'Counting 1-10: Hana, Dul, Set, Net, Dasot, Yoseot, Ilgop, Yodol, Ahop, Yeol',
+        ]
+      },
+      yellow: {
+        name: 'Yellow Belt',
+        class: 'belt-yellow',
+        lessons: [
+          'Yellow tip: Learn Kibon Hana',
+          'Red tip: Front snap kick, Roundhouse kick, Side kick',
+          'Green tip: Execution of all three one-step sparring',
+          'Black tip: Learn all testing requirements for yellow belt',
+          'Korean Terms: Learn Korean terms',
+        ],
+        dailies: [
+          '15x Bow Practice',
+          '10 min Stretching',
+        ],
+        exercises: [
+          '20x Front Kicks',
+          '20x Punches',
+          '10x Low Blocks',
+        ],
+        terms: [
+          'Counting: Hana(1), Dul(2), Set(3), Net(4), Dasot(5), Yoseot(6), Ilgop(7), Yodol(8), Ahop(9), Yeol(10)',
+          'Charyot = Attention',
+          'Kyung-neh = Bow',
+          'Kukgi-e Kyung-neh = Bow to the flags',
+          'Sabomnim-ke Kyung-neh = Bow to the Master',
+          'Sunbaenim-ke Kyung-neh = Bow to senior belts',
+          'Ap Chagi = Front Kick (Ap Cha gi)',
+          'Dollyo Chagi = Roundhouse Kick (Dol yo Cha gi)',
+          'Yop Chagi = Side Kick (Yop Cha gi)',
+          'Gomabseumnida = Thank you (Go mab seup nee da)'
+        ]
+      },
+      yellowGreen: {
+        name: 'Yellow Belt Green Stripe',
+        class: 'belt-yellow',
+        lessons: [
+          'Dan-Gun Pattern',
+          'Combination Blocks',
+        ],
+        dailies: [
+          '18x Bow Practice',
+          '12 min Stretching',
+        ],
+        exercises: [
+          '25x Front Kicks',
+          '15x Low Blocks',
+        ]
+      },
+      green: {
+        name: 'Green Belt',
+        class: 'belt-green',
+        lessons: [
+          'Do-San Pattern',
+          'Intermediate Kicks',
+        ],
+        dailies: [
+          '20x Bow Practice',
+          '15 min Cardio',
+        ],
+        exercises: [
+          '30x Front Kicks',
+          '20x Side Kicks',
+          '20x High Blocks',
+        ]
+      },
+      greenBlue: {
+        name: 'Green Belt Blue Stripe',
+        class: 'belt-green',
+        lessons: [
+          'Won-Hyo Pattern',
+          'Turning Kicks',
+        ],
+        dailies: [
+          '22x Bow Practice',
+          '16 min Cardio',
+        ],
+        exercises: [
+          '35x Front Kicks',
+          '25x Side Kicks',
+        ],
+        terms: []
+      },
+      blue: {
+        name: 'Blue Belt',
+        class: 'belt-blue',
+        lessons: [
+          'Yul-Gok Pattern',
+          'Advanced Kicks',
+        ],
+        dailies: [
+          '25x Bow Practice',
+          '20 min Cardio',
+        ],
+        exercises: [
+          '40x Front Kicks',
+          '30x Side Kicks',
+          '30x High Blocks',
+        ],
+        terms: []
+      },
+      blueBrown: {
+        name: 'Blue Belt Brown Stripe',
+        class: 'belt-blue',
+        lessons: [
+          'Joong-Gun Pattern',
+          'Jumping Kicks',
+        ],
+        dailies: [
+          '28x Bow Practice',
+          '22 min Cardio',
+        ],
+        exercises: [
+          '45x Front Kicks',
+          '35x Side Kicks',
+        ]
+      },
+      brown: {
+        name: 'Brown Belt',
+        class: 'belt-red',
+        lessons: [
+          'Toi-Gye Pattern',
+          'Sparring Drills',
+        ],
+        dailies: [
+          '30x Bow Practice',
+          '25 min Cardio',
+        ],
+        exercises: [
+          '50x Front Kicks',
+          '40x Side Kicks',
+        ]
+      },
+      brownRed: {
+        name: 'Brown Belt Red Stripe',
+        class: 'belt-red',
+        lessons: [
+          'Hwa-Rang Pattern',
+          'Advanced Sparring',
+        ],
+        dailies: [
+          '32x Bow Practice',
+          '27 min Cardio',
+        ],
+        exercises: [
+          '55x Front Kicks',
+          '45x Side Kicks',
+        ]
+      },
+      red: {
+        name: 'Red Belt',
+        class: 'belt-red',
+        lessons: [
+          'Chung-Mu Pattern',
+          'Sparring Drills',
+        ],
+        dailies: [
+          '35x Bow Practice',
+          '28 min Cardio',
+        ],
+        exercises: [
+          '60x Front Kicks',
+          '50x Side Kicks',
+        ]
+      },
+      redOne: {
+        name: 'Red Belt One Stripe',
+        class: 'belt-red',
+        lessons: [
+          'Pattern Review',
+          'Board Breaking',
+        ],
+        dailies: [
+          '38x Bow Practice',
+          '29 min Cardio',
+        ],
+        exercises: [
+          '65x Front Kicks',
+          '55x Side Kicks',
+        ]
+      },
+      redTwo: {
+        name: 'Red Belt Two Stripes',
+        class: 'belt-red',
+        lessons: [
+          'Pre-Black Belt Review',
+          'Advanced Board Breaking',
+        ],
+        dailies: [
+          '40x Bow Practice',
+          '30 min Cardio',
+        ],
+        exercises: [
+          '70x Front Kicks',
+          '60x Side Kicks',
+        ]
+      },
+      black: {
+        name: 'Black Belt',
+        class: 'belt-black',
+        lessons: [
+          'Choong-Moo Pattern',
+          'Leadership Training',
+        ],
+        dailies: [
+          '45x Bow Practice',
+          '35 min Cardio',
+        ],
+        exercises: [
+          '80x Front Kicks',
+          '70x Side Kicks',
+        ]
+      }
+    };
 
-    <script>
-        // Data for the app
-        const user = {
-            name: "John Doe",
-            belt: "White",
-            level: 1,
-            xp: 0,
-            xpToNextLevel: 1000,
-            lessonsCompleted: 0,
-            workoutsCompleted: 0,
-            formsPracticed: 0,
-            dailyMissionCompleted: false,
-        };
+    // XP/Level system
+    let xp = 0;
+    let level = 1;
+    let xpMax = 100;
+    let currentBelt = 'white';
+  let activeTab = 'lessons';
 
-        // Updated belt ranks with Black Stripe before Double Black Stripe
-        const beltRanks = [
-            { belt: "White", xpLevel: 0 },
-            { belt: "Yellow Stripe", xpLevel: 1000 },
-            { belt: "Yellow", xpLevel: 2500 },
-            { belt: "Green Stripe", xpLevel: 5000 },
-            { belt: "Green", xpLevel: 8000 },
-            { belt: "Blue Stripe", xpLevel: 12000 },
-            { belt: "Blue", xpLevel: 16000 },
-            { belt: "Brown Stripe", xpLevel: 19000 },
-            { belt: "Brown", xpLevel: 22000 },
-            { belt: "Red Stripe", xpLevel: 26000 },
-            { belt: "Red", xpLevel: 30000 },
-            { belt: "Black Stripe", xpLevel: 34000 }, // Position changed
-            { belt: "Double Black Stripe", xpLevel: 38000 }, // Position changed
-            { belt: "Black 1st Dan", xpLevel: 45000 },
-            { belt: "Black 2nd Dan", xpLevel: 60000 },
-            { belt: "Black 3rd Dan", xpLevel: 80000 },
-        ];
+    function updateXP(amount) {
+      xp += amount;
+      while (xp >= xpMax) {
+        xp -= xpMax;
+        level++;
+        xpMax = Math.floor(xpMax * 1.2);
+        showLevelUp();
+      }
+      document.getElementById('xp').textContent = xp;
+      document.getElementById('xpMax').textContent = xpMax;
+      document.getElementById('level').textContent = level;
+      document.getElementById('xpBar').style.width = (xp / xpMax * 100) + '%';
+    }
 
-        // All lessons and forms available in the app, with updated belt mappings
-        const allLessons = [
-            // White Belt Lessons
-            { id: 'white-stance-1', title: 'Horse Stance (Juchum Seogi)', xp: 50, belt: 'White' },
-            { id: 'white-stance-2', title: 'Walking Stance (Ap Seogi)', xp: 50, belt: 'White' },
-            { id: 'white-stance-3', title: 'Forward Stance (Ap Kubi)', xp: 50, belt: 'White' },
-            { id: 'white-block-1', title: 'Low Block (Arae Makki)', xp: 50, belt: 'White' },
-            { id: 'white-kick-1', title: 'Front Snap Kick (Ap Chagi)', xp: 50, belt: 'White' },
-            
-            // Yellow Stripe Lessons
-            { id: 'form-taegeuk-1', title: 'Taegeuk Il Jang (Form 1)', xp: 100, belt: 'Yellow Stripe' },
-            { id: 'yellow-block-1', title: 'Middle Block (Momtong Makki)', xp: 50, belt: 'Yellow Stripe' },
-            
-            // Yellow Belt Lessons
-            { id: 'form-taegeuk-2', title: 'Taegeuk Ee Jang (Form 2)', xp: 100, belt: 'Yellow' },
-            { id: 'yellow-block-2', title: 'High Block (Eolgul Makki)', xp: 50, belt: 'Yellow' },
-            { id: 'yellow-kick-1', title: 'Roundhouse Kick (Dollyo Chagi)', xp: 50, belt: 'Yellow' },
+    function showLevelUp() {
+      const el = document.createElement('div');
+      el.textContent = 'Level Up!';
+      el.className = 'fixed top-8 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg text-2xl z-50 animate-bounce';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1800);
+    }
 
-            // Green Stripe Lessons
-            { id: 'form-taegeuk-3', title: 'Taegeuk Sam Jang (Form 3)', xp: 100, belt: 'Green Stripe' },
-            { id: 'green-block-1', title: 'Knife-Hand Block (Sonnal Makki)', xp: 50, belt: 'Green Stripe' },
-            
-            // Green Belt Lessons
-            { id: 'form-taegeuk-4', title: 'Taegeuk Sa Jang (Form 4)', xp: 100, belt: 'Green' },
-            { id: 'green-kick-1', title: 'Side Kick (Yeop Chagi)', xp: 50, belt: 'Green' },
-            
-            // Blue Stripe Lessons
-            { id: 'form-taegeuk-5', title: 'Taegeuk Oh Jang (Form 5)', xp: 100, belt: 'Blue Stripe' },
-            { id: 'blue-block-1', title: 'Pincer Block (Gawi Makki)', xp: 50, belt: 'Blue Stripe' },
-            
-            // Blue Belt Lessons
-            { id: 'form-taegeuk-6', title: 'Taegeuk Yuk Jang (Form 6)', xp: 100, belt: 'Blue' },
-            { id: 'blue-stance-1', title: 'Tiger Stance (Beom Seogi)', xp: 50, belt: 'Blue' },
-            
-            // Brown Stripe Lessons
-            { id: 'brown-stripe-form', title: 'Poomsae Chil Jang (Form 7)', xp: 100, belt: 'Brown Stripe' },
-            
-            // Brown Belt Lessons
-            { id: 'brown-belt-form', title: 'Poomsae Pal Jang (Form 8)', xp: 100, belt: 'Brown' },
-            
-            // Red Stripe Lessons
-            { id: 'red-stripe-form', title: 'Hwarang Form', xp: 100, belt: 'Red Stripe' },
-            
-            // Red Belt Lessons
-            { id: 'red-belt-form', title: 'Choi Yong Form', xp: 100, belt: 'Red' },
-
-            // Black Stripe Lessons
-            { id: 'black-stripe-form', title: 'Advanced Sparring Drills', xp: 150, belt: 'Black Stripe' },
-            
-            // Double Black Stripe Lessons
-            { id: 'double-black-stripe-form', title: 'Koryo Poomsae', xp: 200, belt: 'Double Black Stripe' },
-            
-            // Black Belt 1st Dan Lessons
-            { id: 'form-geumgang', title: 'Geumgang (Black Belt Form)', xp: 200, belt: 'Black 1st Dan' },
-
-            // Black Belt 2nd Dan Lessons
-            { id: 'form-jitae', title: 'Jitae (Black Belt Form)', xp: 250, belt: 'Black 2nd Dan' },
-
-            // Black Belt 3rd Dan Lessons
-            { id: 'form-cheonggwon', title: 'Cheonggwon (Black Belt Form)', xp: 300, belt: 'Black 3rd Dan' },
-        ];
-
-
-        // DOM elements
-        const appContent = document.getElementById('app-content');
-        const navButtons = document.querySelectorAll('.nav-btn');
-        const modal = document.getElementById('modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalMessage = document.getElementById('modal-message');
-        const modalCloseBtn = document.getElementById('modal-close-btn');
-
-        // Functions to manage app state and UI
-        function showModal(title, message) {
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            modal.style.display = 'flex';
+    function renderSection(listId, items, type) {
+      const ul = document.getElementById(listId);
+      ul.innerHTML = '';
+      items.forEach((item, idx) => {
+        const li = document.createElement('li');
+        if (type === 'terms') {
+          li.className = 'bg-white/10 rounded-lg border border-white/10 p-3 text-slate-200';
+          li.textContent = item;
+        } else {
+          li.className = 'flex items-center bg-white/10 rounded-lg border border-white/10 p-3 justify-between';
+          li.innerHTML = `<span class="text-slate-200">${item}</span><button class="ml-4 px-3 py-1 bg-cyan-500 text-slate-900 rounded hover:bg-cyan-400" data-type="${type}" data-idx="${idx}">Complete</button>`;
         }
+        ul.appendChild(li);
+      });
 
-        modalCloseBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-
-        function saveUserData() {
-            // In a real app, this would save to a database.
-            // For this demo, we'll just log it.
-            console.log('User data saved:', user);
+      // When more than 2 items, constrain height to two rows and enable scroll
+      if (items.length > 2) {
+        // Allow layout to compute heights then measure first two list items
+        const lis = Array.from(ul.children);
+        let maxH = 0;
+        for (let i = 0; i < Math.min(2, lis.length); i++) {
+          maxH += lis[i].getBoundingClientRect().height;
         }
+        if (lis.length >= 2) maxH += 8; // accounts for Tailwind space-y-2 (0.5rem)
+        ul.style.maxHeight = maxH + 'px';
+        ul.style.overflowY = 'auto';
+        ul.classList.add('thin-scroll', 'pr-1');
+      } else {
+        ul.style.maxHeight = '';
+        ul.style.overflowY = '';
+        ul.classList.remove('thin-scroll', 'pr-1');
+      }
+    }
 
-        function gainXP(amount, message) {
-            user.xp += amount;
-            showModal('XP Gained!', `You earned ${amount} XP for completing a task. Keep it up!`);
-            
-            while (user.xp >= user.xpToNextLevel) {
-                user.xp -= user.xpToNextLevel;
-                user.level++;
-                user.xpToNextLevel = Math.floor(user.xpToNextLevel * 1.5); // Increase XP requirement for next level
-                showModal('Level Up!', `You are now level ${user.level}! A new challenge awaits!`);
-            }
+    function updateBelt(belt) {
+      currentBelt = belt;
+      const beltInfo = beltData[belt];
+      const beltDisplay = document.getElementById('beltDisplay');
+      beltDisplay.textContent = beltInfo.name;
+      beltDisplay.className = 'belt ' + beltInfo.class;
+      renderSection('lessonList', beltInfo.lessons, 'lesson');
+      renderSection('dailiesList', beltInfo.dailies, 'daily');
+      renderSection('exercisesList', beltInfo.exercises, 'exercise');
+      renderSection('termsList', beltInfo.terms || [], 'terms');
 
-            checkBeltProgression();
-            saveUserData();
-            renderDashboard(); // Re-render the dashboard to show new progress
+      // Theme hero background glow accents by belt color
+      const hero = document.getElementById('heroBg');
+      const palette = {
+        white: ['rgba(148,163,184,0.5)','rgba(203,213,225,0.5)'],
+        yellow: ['rgba(252,211,77,0.5)','rgba(251,191,36,0.5)'],
+        yellowGreen: ['rgba(252,211,77,0.5)','rgba(34,197,94,0.5)'],
+        green: ['rgba(34,197,94,0.5)','rgba(16,185,129,0.5)'],
+        greenBlue: ['rgba(34,197,94,0.5)','rgba(59,130,246,0.5)'],
+        blue: ['rgba(59,130,246,0.5)','rgba(56,189,248,0.5)'],
+        blueBrown: ['rgba(59,130,246,0.5)','rgba(120,72,36,0.5)'],
+        brown: ['rgba(120,72,36,0.6)','rgba(245,158,11,0.4)'],
+        brownRed: ['rgba(120,72,36,0.6)','rgba(239,68,68,0.5)'],
+        red: ['rgba(239,68,68,0.5)','rgba(245,158,11,0.5)'],
+        redOne: ['rgba(239,68,68,0.5)','rgba(244,63,94,0.5)'],
+        redTwo: ['rgba(239,68,68,0.6)','rgba(190,24,93,0.5)'],
+        black: ['rgba(99,102,241,0.5)','rgba(56,189,248,0.5)'],
+      };
+      const [g1,g2] = palette[belt] || palette.white;
+      hero.style.setProperty('--glow1', g1);
+      hero.style.setProperty('--glow2', g2);
+
+      // Show/hide Terms tab for belts White→Blue
+      const termsTab = document.querySelector('.tab-btn[data-tab="terms"]');
+      const showTerms = ['white','yellow','yellowGreen','green','greenBlue','blue'].includes(belt);
+      termsTab.classList.toggle('hidden', !showTerms);
+      updateTabIndicatorWidth();
+
+      // After rerender, reapply scroll cap to current tab
+      setTimeout(() => {
+        if (activeTab && lists[activeTab]) applyScrollCap(lists[activeTab]);
+      });
+    }
+
+    document.getElementById('beltSelect').addEventListener('change', (e) => {
+      updateBelt(e.target.value);
+    });
+
+    document.addEventListener('click', function(e) {
+      if (e.target.tagName === 'BUTTON' && e.target.dataset.type) {
+        updateXP(20);
+        e.target.disabled = true;
+        e.target.textContent = 'Done!';
+        e.target.classList.remove('bg-blue-500', 'hover:bg-blue-700');
+        e.target.classList.add('bg-green-500');
+      }
+    });
+
+    // Tab controls
+    const tabs = Array.from(document.querySelectorAll('.tab-btn'));
+    const lists = {
+      lessons: document.getElementById('lessonList'),
+      dailies: document.getElementById('dailiesList'),
+      exercises: document.getElementById('exercisesList'),
+      terms: document.getElementById('termsList')
+    };
+    const indicator = document.getElementById('tabIndicator');
+    function visibleTabs() { return tabs.filter(t => !t.classList.contains('hidden')); }
+    function updateTabIndicatorWidth() {
+      const vis = visibleTabs();
+      const w = 100 / vis.length;
+      indicator.style.width = w + '%';
+      const idx = vis.findIndex(b => b.dataset.tab === activeTab);
+      indicator.style.left = `${(idx >= 0 ? idx : 0) * w}%`;
+    }
+    function applyScrollCap(ul) {
+      if (!ul) return;
+      // Measure two items when visible
+      const wasHidden = ul.classList.contains('hidden');
+      if (wasHidden) ul.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        const lis = Array.from(ul.children);
+        if (lis.length > 2) {
+          let maxH = 0;
+          for (let i = 0; i < 2; i++) maxH += lis[i].getBoundingClientRect().height;
+          maxH += 8; // gap between rows (space-y-2)
+          ul.style.maxHeight = maxH + 'px';
+          ul.style.overflowY = 'auto';
+          ul.classList.add('thin-scroll','pr-1');
+        } else {
+          ul.style.maxHeight = '';
+          ul.style.overflowY = '';
+          ul.classList.remove('thin-scroll','pr-1');
         }
+        if (wasHidden) ul.classList.add('hidden');
+      });
+    }
+    function setTab(name) {
+      const vis = visibleTabs();
+      vis.forEach((b,i) => {
+        const active = b.dataset.tab === name;
+        b.classList.toggle('active', active);
+        if (active) indicator.style.left = `${i * (100/vis.length)}%`;
+      });
+      Object.keys(lists).forEach(k => lists[k].classList.add('hidden'));
+      if (lists[name]) lists[name].classList.remove('hidden');
+      activeTab = name;
+      updateTabIndicatorWidth();
+      applyScrollCap(lists[name]);
+    }
+    tabs.forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
 
-        function checkBeltProgression() {
-            // Find the index of the user's current belt
-            const currentBeltIndex = beltRanks.findIndex(rank => rank.belt === user.belt);
-            // Check if there is a next belt and if the user has reached the XP level for it
-            if (currentBeltIndex < beltRanks.length - 1) {
-                const nextBelt = beltRanks[currentBeltIndex + 1];
-                if (user.xp >= nextBelt.xpLevel) {
-                    user.belt = nextBelt.belt;
-                    showModal('Belt Promotion!', `Congratulations, you have been promoted to **${user.belt}**!`);
-                }
-            }
-        }
-
-        function renderDashboard() {
-            const xpPercentage = (user.xp / user.xpToNextLevel) * 100;
-
-            const content = `
-                <section class="mb-8 p-4 bg-blue-100 rounded-xl">
-                    <h2 class="text-3xl font-extrabold text-blue-800 mb-1">Hi, ${user.name}!</h2>
-                    <p class="text-lg text-blue-700">You are a **${user.belt}** belt.</p>
-                    <p class="text-sm text-blue-600 font-semibold mt-2">Level ${user.level} - ${user.xp} / ${user.xpToNextLevel} XP</p>
-                    <div class="progress-bar-container mt-2">
-                        <div class="progress-bar" style="width: ${xpPercentage}%;"></div>
-                    </div>
-                </section>
-
-                <section class="mb-8">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Daily Mission</h3>
-                    <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-200">
-                        <p class="text-gray-700">Practice the first 5 moves of Taegeuk Il Jang.</p>
-                        <button id="complete-daily-mission-btn" class="mt-4 px-6 py-2 bg-yellow-500 text-white font-bold rounded-full hover:bg-yellow-600 transition shadow-md">Complete Mission (+50 XP)</button>
-                    </div>
-                </section>
-
-                <section class="mb-8">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Performance Charts</h3>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                        <div class="h-40 flex items-end gap-2">
-                            ${[user.lessonsCompleted, user.formsPracticed, user.workoutsCompleted].map((value, index) => `
-                                <div class="flex-1 bg-blue-500 rounded-t-lg chart-bar" style="height: ${(value / 10) * 100 > 100 ? 100 : (value / 10) * 100}%;"></div>
-                            `).join('')}
-                        </div>
-                        <div class="flex justify-between text-xs text-gray-500 mt-2">
-                            <span>Lessons</span>
-                            <span>Forms</span>
-                            <span>Workouts</span>
-                        </div>
-                    </div>
-                </section>
-            `;
-
-            appContent.innerHTML = content;
-            document.getElementById('complete-daily-mission-btn').addEventListener('click', () => {
-                if (!user.dailyMissionCompleted) {
-                    gainXP(50, 'Daily mission completed!');
-                    user.dailyMissionCompleted = true;
-                    renderDashboard(); // Re-render to disable button
-                } else {
-                    showModal('Already Complete', 'You have already completed your daily mission!');
-                }
-            });
-        }
-
-        function renderLessons() {
-            const userBeltIndex = beltRanks.findIndex(rank => rank.belt === user.belt);
-            const availableLessons = allLessons.filter(lesson => 
-                beltRanks.findIndex(r => r.belt === lesson.belt) <= userBeltIndex
-            );
-
-            const content = `
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Lesson Plans & Forms</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    ${availableLessons.map(lesson => `
-                        <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between">
-                            <div>
-                                <h4 class="font-semibold text-gray-900">${lesson.title}</h4>
-                                <p class="text-sm text-gray-500">For ${lesson.belt} Belts</p>
-                            </div>
-                            <button class="complete-lesson-btn mt-4 px-4 py-2 bg-green-500 text-white rounded-full text-sm hover:bg-green-600 transition" data-xp="${lesson.xp}" data-task-type="${lesson.title.includes('Poomsae') || lesson.title.includes('Hwarang') || lesson.title.includes('Choi Yong') || lesson.title.includes('Koryo') || lesson.title.includes('Geumgang') || lesson.title.includes('Jitae') || lesson.title.includes('Cheonggwon') ? 'forms' : 'lessons'}">Complete (+${lesson.xp} XP)</button>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-
-            appContent.innerHTML = content;
-            document.querySelectorAll('.complete-lesson-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const xpAmount = parseInt(e.target.dataset.xp);
-                    const taskType = e.target.dataset.task-type;
-                    gainXP(xpAmount, 'Lesson completed!');
-                    if (taskType === 'lessons') user.lessonsCompleted++;
-                    if (taskType === 'forms') user.formsPracticed++;
-                });
-            });
-        }
-
-        function renderWorkouts() {
-            const workouts = [
-                { id: 'workout-1', title: 'Flexibility Routine', xp: 75 },
-                { id: 'workout-2', title: 'Core Strength', xp: 75 },
-                { id: 'workout-3', title: 'Speed Drills', xp: 75 },
-            ];
-
-            const content = `
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Exercise Programs</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    ${workouts.map(workout => `
-                        <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between">
-                            <h4 class="font-semibold text-gray-900">${workout.title}</h4>
-                            <button class="complete-workout-btn mt-4 px-4 py-2 bg-purple-500 text-white rounded-full text-sm hover:bg-purple-600 transition" data-xp="${workout.xp}">Complete (+${workout.xp} XP)</button>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-
-            appContent.innerHTML = content;
-            document.querySelectorAll('.complete-workout-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const xpAmount = parseInt(e.target.dataset.xp);
-                    gainXP(xpAmount, 'Workout completed!');
-                    user.workoutsCompleted++;
-                });
-            });
-        }
-
-        function renderProgress() {
-            const content = `
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Progress Tracker</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-200">
-                        <h4 class="font-semibold text-gray-900">Level & Rank History</h4>
-                        <ul class="text-gray-700 mt-2 list-disc list-inside">
-                            <li>Reached Level 1 on 01/01/2025</li>
-                            <li>Achieved White Belt on 01/01/2025</li>
-                        </ul>
-                    </div>
-                    <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-200">
-                        <h4 class="font-semibold text-gray-900">Achievements</h4>
-                        <ul class="text-gray-700 mt-2 list-disc list-inside">
-                            <li><span class="font-semibold">First 10 Kicks:</span> Complete 10 kicking drills. (Bonus: +100 XP)</li>
-                            <li><span class="font-semibold">Consistent Student:</span> Practice 5 days in a row. (Bonus: +200 XP)</li>
-                        </ul>
-                    </div>
-                </div>
-            `;
-
-            appContent.innerHTML = content;
-        }
-
-        // Event listeners for navigation
-        document.getElementById('dashboard-btn').addEventListener('click', renderDashboard);
-        // Event listeners for desktop navigation
-        document.getElementById('lessons-btn').addEventListener('click', renderLessons);
-        document.getElementById('workouts-btn').addEventListener('click', renderWorkouts);
-        document.getElementById('progress-btn').addEventListener('click', renderProgress);
-
-        // Event listeners for mobile navigation
-        document.getElementById('lessons-btn-mobile').addEventListener('click', renderLessons);
-        document.getElementById('workouts-btn-mobile').addEventListener('click', renderWorkouts);
-        document.getElementById('progress-btn-mobile').addEventListener('click', renderProgress);
-
-        // Initial render
-        renderDashboard();
-    </script>
+    // Initial render
+    updateBelt('white');
+    updateXP(0);
+    setTab('lessons');
+  </script>
 </body>
 </html>
